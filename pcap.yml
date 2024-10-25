@@ -1,0 +1,24 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+  
+  - name: Updating and upgrading the operating system
+    apt:
+      name: "*"
+      state: latest
+      update_cache: true
+
+  - name: Collecting log files
+    find:
+      paths: /var/log/
+      patterns: '*.log'
+    register: log_files
+
+  - name: Copy logs from control node to manage node
+    fetch:
+      src: "{{ item.path }}"
+      dest: /tmp/logs/
+      flat: yes
+    with_items: "{{ log_files.files }}"
